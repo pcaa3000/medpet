@@ -8,8 +8,9 @@ class WebhookController {
     try {
       // check if the webhook request contains a message
       const message = req.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+      const senderInfo = req.body.entry?.[0]?.changes?.[0]?.value?.contacts?.[0];
       if (message) {
-        await messageHandler.handleMessage(message);
+        await messageHandler.handleMessage(message, senderInfo);
       }
       res.status(200).send('EVENT_RECEIVED');
     } catch (error) {

@@ -1,0 +1,12 @@
+# Docker Compose file for the application nodejs from dockerfiles.dev
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm start
