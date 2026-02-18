@@ -54,6 +54,34 @@ class WhatsAppService {
       throw new Error(`Error marking WhatsApp message as read: ${error.message}`);
     }
   }
-}
+  //function to send a interactive button message using the WhatsApp Business API
+  async sendInteractiveButtonMessage(phoneNumber, message, buttons) {
+    const url = `https://graph.facebook.com/${this.apiVersion}/${this.businessPhone}/messages`;
+    const data = {
+      messaging_product: 'whatsapp',
+      to: phoneNumber,
+      type: 'interactive',
+      interactive: {
+        type: 'button',
+        body: {
+          text: message
+        },
+        action: {
+          buttons: buttons
+        }
+      }
+    };
+    const headers = {
+      Authorization: `Bearer ${this.apiToken}`,
+      'Content-Type': 'application/json'
+    };
+    try {
+      const response = await axios.post(url, data, { headers });
+      return response.data;
+    } catch (error) {
+      throw new Error(`Error sending WhatsApp interactive button message: ${error.message}`);
+    }
+  }
+} 
 
 module.exports = new WhatsAppService();
