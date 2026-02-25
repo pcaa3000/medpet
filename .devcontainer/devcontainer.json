@@ -7,7 +7,7 @@
 	//"build": {
 	//	"dockerfile": "../Dockerfile"
 	//},
-	"dockercomposeFile": "../docker-compose.yaml",
+	"dockerComposeFile": "../docker-compose.yaml",
 	"service": "app",
 	"workspaceFolder": "/usr/src/app",
 

@@ -3,6 +3,9 @@ const whatsappService = require('./whatsappService.js');
 
 //class for message handling
 class MessageHandler {
+  constructor() {
+    this.appointmentState = {};
+  }
   //function to handle incoming messages
   async handleMessage(message, senderInfo) {
     //check if the message is a text message
@@ -15,6 +18,10 @@ class MessageHandler {
       if (this.isGreeting(text)) {
         await this.sendWelcomeMessage(phoneNumber, senderInfo);
         await this.sendWelcomeMenu(phoneNumber);
+      } else if(text.toLowerCase() === 'image' || text.toLowerCase() === 'video' || text.toLowerCase() === 'audio' || text.toLowerCase() === 'document'){
+        await this.sendMediaMessage(phoneNumber, text.toLowerCase());
+      } else if(this.appointmentState[phoneNumber]){
+        await this.handleAppointmentFlow(phoneNumber, text);
       } else {
         //send a response back to the user
         const responseMessage = `You said: ${text}`;
@@ -83,8 +90,8 @@ class MessageHandler {
     let responseMessage;
     switch (option) {
       case 'opcion_1':
-        //await this.sendCitasMenu(phoneNumber);
-        responseMessage = 'Vamos a agendar una cita';
+        this.appointmentState[phoneNumber] = { step: 'name' }; // Initialize the appointment flow state
+        responseMessage = 'Vamos a agendar una cita. Por favor, proporciona tu nombre para comenzar.';
         break;
       case 'opcion_2':
         //await this.sendServiciosMenu(phoneNumber);
@@ -100,6 +107,94 @@ class MessageHandler {
     }
     await whatsappService.sendMessage(phoneNumber, responseMessage);
   }
+  //function to send a media message
+  async sendMediaMessage(phoneNumber,  mediaType) {
+    let mediaUrl, caption;
+    switch (mediaType) {
+      case 'image':
+        mediaUrl = 'https://s3.amazonaws.com/gndx.dev/medpet-imagen.png';
+        caption = 'This is an image';
+        break;
+      case 'video':
+        mediaUrl = 'https://s3.amazonaws.com/gndx.dev/medpet-video.mp4';
+        caption = 'This is a video';
+        break;
+      case 'audio':
+        mediaUrl = 'https://s3.amazonaws.com/gndx.dev/medpet-audio.aac';
+        break;
+      case 'document':
+        mediaUrl = 'https://s3.amazonaws.com/gndx.dev/medpet-file.pdf';
+        caption = 'This is a document';
+        break;
+      default:
+        throw new Error(`Unsupported media type: ${mediaType}`);
+    }
+    await whatsappService.sendMediaMessage(phoneNumber, mediaUrl, mediaType, caption);
+  }
+  //funtion to complete the appointment flow
+  completeAppointmentFlow(phoneNumber) {
+    const appointmentDetails = this.appointmentState[phoneNumber];
+    // Here you can save the appointment details to a database or send it to the veterinary staff 
+    delete this.appointmentState[phoneNumber];
+    const userData = [phoneNumber, appointmentDetails.name, appointmentDetails.petName, appointmentDetails.petType, appointmentDetails.reason, appointmentDetails.datetime];
+    return `¡Gracias! Tu cita ha sido agendada con los siguientes detalles:\nNombre: ${appointmentDetails.name}\nNombre de la mascota: ${appointmentDetails.petName}\nTipo de mascota: ${appointmentDetails.petType}\nMotivo: ${appointmentDetails.reason}\nFecha y hora: ${appointmentDetails.datetime}
+    \nNos pondremos en contacto contigo para confirmar la cita.`;
+  }
+  //function to handke appointment flow
+  async handleAppointmentFlow(phoneNumber,message) {
+    // Implement the appointment scheduling flow here
+    const state = this.appointmentState[phoneNumber] || 'initial';
+    let responseMessage;
+    switch (state.step) {
+      case 'name':
+        // Ask the name of the pet
+        state.name = message
+        responseMessage = 'Gracias, ¿Cuál es el nombre de tu mascota?';
+        state.step = 'pet_name';
+        break;
+      case 'pet_name':
+        // Ask the type of pet
+        state.petName = message;
+        responseMessage = '¿Qué tipo de mascota tienes? (Perro, Gato, etc.)';
+        state.step = 'pet_type';
+        break;
+      case 'pet_type':
+        // Ask the reason for the appointment
+        state.petType = message;
+        responseMessage = '¿Cuál es el motivo de la cita?';
+        state.step = 'reason';
+        break;
+      case 'reason':
+        // ask the date and time for the appointment
+        state.reason = message;
+        responseMessage = '¿Cuándo te gustaría agendar la cita? (Por favor proporciona una fecha y hora (DD/MM/YYYY HH:mm))';
+        state.step = 'datetime';
+        break;
+      case 'datetime':
+        // Confirm the appointment details
+        state.datetime = message;
+        responseMessage = `Tu cita será agendada para el ${state.datetime}. ¿Es correcto? (Sí/No)`;
+        state.step = 'confirmation';
+        break;
+      case 'confirmation':
+        if (message.toLowerCase() === 'sí' || message.toLowerCase() === 'si') {
+          // Save the appointment details to the database or send it to the veterinary staff
+          responseMessage = this.completeAppointmentFlow(phoneNumber);
+        } else {
+          responseMessage = 'Entendido, no se ha agendado la cita. Si deseas intentarlo de nuevo, por favor proporciona los detalles nuevamente.';
+          delete this.appointmentState[phoneNumber]; // Clear the state if not confirmed
+        }
+        break;
+      default:
+        responseMessage = '¡Hola! Para agendar una cita, por favor proporciona tu nombre.';
+        state.step = 'name';
+    }
+    this.appointmentState[phoneNumber] = state; // Save the state for the user
+    await whatsappService.sendMessage(phoneNumber, responseMessage);
+  }
 }
 module.exports= new MessageHandler();
+
+
+
 
