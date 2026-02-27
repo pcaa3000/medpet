@@ -4,3 +4,4 @@ node_modules/
 .github/instructions/snyk_rules.instructions.md
 .vscode/
 .github/
+src/credentials/credentials.json

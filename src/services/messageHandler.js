@@ -1,5 +1,7 @@
 //import whatsappService from './whatsappService.js';
 const whatsappService = require('./whatsappService.js');
+//import googleSheetService from './googleSheetService.js';
+const googleSheetService = require('./googleSheetService.js');
 
 //class for message handling
 class MessageHandler {
@@ -137,6 +139,8 @@ class MessageHandler {
     // Here you can save the appointment details to a database or send it to the veterinary staff 
     delete this.appointmentState[phoneNumber];
     const userData = [phoneNumber, appointmentDetails.name, appointmentDetails.petName, appointmentDetails.petType, appointmentDetails.reason, appointmentDetails.datetime];
+    // Save the appointment details to Google Sheets
+    googleSheetService.appendToSheet('19wxFndymydKE_qTf1lQcPSZOS-ANLmiwl9-mqFr7srw', 'reservas!A:F', userData);
     return `¡Gracias! Tu cita ha sido agendada con los siguientes detalles:\nNombre: ${appointmentDetails.name}\nNombre de la mascota: ${appointmentDetails.petName}\nTipo de mascota: ${appointmentDetails.petType}\nMotivo: ${appointmentDetails.reason}\nFecha y hora: ${appointmentDetails.datetime}
     \nNos pondremos en contacto contigo para confirmar la cita.`;
   }
