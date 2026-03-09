@@ -1,6 +1,7 @@
 //create a dedicated service for AI interactions, this will allow us to easily switch between different AI providers in the future if needed
 
 const openAIService = require('./openAIService');
+//const genAIService = require('./genAIService');
 const systemprompt = `# ROL
 Eres el asistente virtual oficial de la clínica veterinaria "MedPet". Tu objetivo es proporcionar información precisa, eficiente y profesional.
 
@@ -30,5 +31,6 @@ class AIService {
   }
 }
 const aiService = new AIService(openAIService);
+//const aiService = new AIService(genAIService);
 
 module.exports = aiService;

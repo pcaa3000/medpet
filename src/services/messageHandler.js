@@ -2,11 +2,14 @@
 const whatsappService = require('./whatsappService.js');
 //import googleSheetService from './googleSheetService.js';
 const googleSheetService = require('./googleSheetService.js');
+//import aiService from './aiService.js';
+const aiService = require('./AIService.js');
 
 //class for message handling
 class MessageHandler {
   constructor() {
     this.appointmentState = {};
+    this.asistantState = {};
   }
   //function to handle incoming messages
   async handleMessage(message, senderInfo) {
@@ -24,6 +27,9 @@ class MessageHandler {
         await this.sendMediaMessage(phoneNumber, text.toLowerCase());
       } else if(this.appointmentState[phoneNumber]){
         await this.handleAppointmentFlow(phoneNumber, text);
+      } else if (this.asistantState[phoneNumber]){
+        // Handle the assistant flow based on the user's state
+        await this.handleAssistantFlow(phoneNumber, text);
       } else {
         //send a response back to the user
         const responseMessage = `You said: ${text}`;
@@ -96,8 +102,8 @@ class MessageHandler {
         responseMessage = 'Vamos a agendar una cita. Por favor, proporciona tu nombre para comenzar.';
         break;
       case 'opcion_2':
-        //await this.sendServiciosMenu(phoneNumber);
-        responseMessage = 'Realiza tu consulta';
+        this.asistantState[phoneNumber] = { step: 'question' }; // Initialize the assistant flow state
+        responseMessage = 'Realiza su consulta';
         break;
       case 'opcion_3':
         //await this.sendUbicacionMenu(phoneNumber);
@@ -195,6 +201,44 @@ class MessageHandler {
     }
     this.appointmentState[phoneNumber] = state; // Save the state for the user
     await whatsappService.sendMessage(phoneNumber, responseMessage);
+  }
+  //function to handle assistant flow
+  async handleAssistantFlow(phoneNumber, message) {
+    // Implement the assistant flow here
+    const state = this.asistantState[phoneNumber] ;
+    let responseMessage;
+    if (state.step === 'question') {
+      // Process the user's question and generate a response using the AI service
+      responseMessage = await aiService.getResponse(message);
+    }
+    delete this.asistantState[phoneNumber]; // Clear the state after processing the question      
+    await whatsappService.sendMessage(phoneNumber, responseMessage);
+    // Optionally, you can ask the user if they have any more questions or if they need further assistance
+    const followUpMessage = '¿Tienes alguna otra pregunta o necesitas más ayuda?';
+    const buttons = [
+      {
+        type: 'reply',
+        reply: {
+          id: 'another_question',
+          title: 'Sí, otra pregunta'
+        }
+      },
+      {
+        type: 'reply',
+        reply: {
+          id: 'end_conversation',
+          title: 'No, gracias'
+        }
+      },
+      {
+        type: 'reply',
+        reply: {
+          id: 'emergency_contact',
+          title: 'Nro. de emergencia'
+        }
+      }
+    ];
+    await whatsappService.sendInteractiveButtonMessage(phoneNumber, followUpMessage, buttons);
   }
 }
 module.exports= new MessageHandler();

@@ -1,16 +1,16 @@
 // import genai 
-const { GenAI } = require('@google/generative-ai');
+const { GoogleGenAI } = require('@google/genai');
 // Initialize GenAI client
-const genai = new GenAI({
+const ai = new GoogleGenAI({
   apiKey: process.env.AI_API_KEY
 });
 
 //function to get response from GenAI
 async function getAIResponse(messages, systemPrompt) {
   try {
-    const response = await genai.models.generateContent({
+    const response = await ai.models.generateContent({
       model: process.env.AI_MODEL,
-      content: messages,
+      contents: messages,
       config: {
         systemInstruction: systemPrompt
       }
