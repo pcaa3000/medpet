@@ -120,6 +120,27 @@ class WhatsAppService {
       throw new Error(`Error sending WhatsApp media message: ${error.message}`);
     }
   }
+  //function to send contact message
+  async sendContactMessage(phoneNumber, contacts) {
+    const url = `https://graph.facebook.com/${this.apiVersion}/${this.businessPhone}/messages`;
+    const data = {
+      messaging_product: 'whatsapp',
+      to: phoneNumber,
+      type: 'contacts',
+      contacts: [contacts]
+    };
+    const headers = {
+      Authorization: `Bearer ${this.apiToken}`,
+      'Content-Type': 'application/json'
+    };
+    try {
+      const response = await axios.post(url, data, { headers });
+      return response.data;
+    } catch (error) {
+      console.error('Error response from WhatsApp API:', error.response?.data);
+      throw new Error(`Error sending WhatsApp contact message: ${error.message}`);
+    }
+  }
 } 
 
 module.exports = new WhatsAppService();

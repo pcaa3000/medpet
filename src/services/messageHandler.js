@@ -109,6 +109,10 @@ class MessageHandler {
         //await this.sendUbicacionMenu(phoneNumber);
         responseMessage = 'Te enviamos la ubicación';
         break;
+      case 'emergency_contact':
+        responseMessage = 'En caso de emergencia, te invitamos a llamar a nuestro centro de contacto.';
+        await this.sendEmergencyContact(phoneNumber);
+        break;
       default:
         //await whatsappService.sendMessage(phoneNumber, 'Opción no válida');
         responseMessage = 'Opción no válida';
@@ -240,9 +244,49 @@ class MessageHandler {
     ];
     await whatsappService.sendInteractiveButtonMessage(phoneNumber, followUpMessage, buttons);
   }
+  //function to send contact information for emergencies
+  async sendEmergencyContact(phoneNumber) {
+    const emergencyContact ={
+      addresses: [
+        {
+          street: 'Calle Principal 123',
+          city: 'Ciudad',
+          state: 'Estado',
+          zip: '12345',
+          country: 'País'
+        }
+      ],
+      phones: [
+        {
+          type: 'work',
+          phone: '+1234567890',
+          wa_id: '1234567890'
+        }
+      ],
+      emails: [
+        {
+          type: 'work',
+          email: 'emergencia@veterinaria.com'
+        }
+      ],
+      name: {
+        formatted_name: 'MedPet Emergencias',
+        first_name: 'MedPet',
+        last_name: 'Emergencias'
+      },
+      org: {
+        company: 'Veterinaria MedPet',
+        department: 'Emergencias',
+        title: 'Contacto de Emergencia'
+      },
+      urls: [
+        {
+          type: 'work',
+          url: 'https://www.veterinariamedpet.com/emergencias'
+        }
+      ]
+    };
+    await whatsappService.sendContactMessage(phoneNumber, emergencyContact);
+  };
 }
 module.exports= new MessageHandler();
-
-
-
-
