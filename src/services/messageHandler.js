@@ -106,8 +106,8 @@ class MessageHandler {
         responseMessage = 'Realiza su consulta';
         break;
       case 'opcion_3':
-        //await this.sendUbicacionMenu(phoneNumber);
         responseMessage = 'Te enviamos la ubicación';
+        await this.sendUbicacionMenu(phoneNumber);
         break;
       case 'emergency_contact':
         responseMessage = 'En caso de emergencia, te invitamos a llamar a nuestro centro de contacto.';
@@ -288,5 +288,13 @@ class MessageHandler {
     };
     await whatsappService.sendContactMessage(phoneNumber, emergencyContact);
   };
+  //function to send location menu
+  async sendUbicacionMenu(phoneNumber) {
+    const latitude = 40.712776;
+    const longitude = -74.005974;
+    const name = 'Veterinaria MedPet';
+    const address = 'Calle Principal 123, Ciudad, Estado, País';
+    await whatsappService.sendLocationMessage(phoneNumber, latitude, longitude, name, address);
+  }
 }
 module.exports= new MessageHandler();

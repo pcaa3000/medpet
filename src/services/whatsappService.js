@@ -141,6 +141,31 @@ class WhatsAppService {
       throw new Error(`Error sending WhatsApp contact message: ${error.message}`);
     }
   }
+  //function to send location message
+  async sendLocationMessage(phoneNumber, latitude, longitude, name, address) {
+    const url = `https://graph.facebook.com/${this.apiVersion}/${this.businessPhone}/messages`;
+    const data = {
+      messaging_product: 'whatsapp',
+      to: phoneNumber,
+      type: 'location',
+      location: {
+        latitude: latitude,
+        longitude: longitude,
+        name: name,
+        address: address
+      }
+    };
+    const headers = {
+      Authorization: `Bearer ${this.apiToken}`,
+      'Content-Type': 'application/json'
+    };
+    try {
+      const response = await axios.post(url, data, { headers });
+      return response.data;
+    } catch (error) {
+      throw new Error(`Error sending WhatsApp location message: ${error.message}`);
+    }
+  }  
 } 
 
 module.exports = new WhatsAppService();
