@@ -1,21 +1,10 @@
-//import axios.js for making HTTP requests
-const axios = require('axios');
+//import sendToWhatsApp function to send messages to WhatsApp
+const sendToWhatsApp = require('./httpRequest/sendToWhatsApp');
 
 //class to handle WhatsApp Business API interactions
 class WhatsAppService {
-  /*constructor(apiVersion, businessPhone, apiToken) {
-    this.apiVersion = apiVersion;
-    this.businessPhone = businessPhone;
-    this.apiToken = apiToken;
-  }*/
-  constructor() {
-    this.apiVersion = process.env.API_VERSION;
-    this.businessPhone = process.env.BUSINESS_PHONE;
-    this.apiToken = process.env.API_TOKEN;
-  } 
   //function to send a message using the WhatsApp Business API
   async sendMessage(phoneNumber, message) {
-    const url = `https://graph.facebook.com/${this.apiVersion}/${this.businessPhone}/messages`;
     const data = {
       messaging_product: 'whatsapp',
       to: phoneNumber,
@@ -23,40 +12,19 @@ class WhatsAppService {
         body: message
       }
     };
-    const headers = {
-      Authorization: `Bearer ${this.apiToken}`,
-      'Content-Type': 'application/json'
-    };
-    try {
-      const response = await axios.post(url, data, { headers });
-      return response.data;
-    } catch (error) {
-      throw new Error(`Error sending WhatsApp message: ${error.message}`);
-    }
+    await sendToWhatsApp(data);
   }
-
   //function to mark a message as read using the WhatsApp Business API
   async markMessageAsRead(messageId) {
-    const url = `https://graph.facebook.com/${this.apiVersion}/${this.businessPhone}/messages`;
     const data = {
       messaging_product: 'whatsapp',
       status: 'read',
       message_id: messageId
     };
-    const headers = {
-      Authorization: `Bearer ${this.apiToken}`,
-      'Content-Type': 'application/json'
-    };
-    try {
-      const response = await axios.post(url, data, { headers });
-      return response.data;
-    } catch (error) {
-      throw new Error(`Error marking WhatsApp message as read: ${error.message}`);
-    }
+    await sendToWhatsApp(data);
   }
   //function to send a interactive button message using the WhatsApp Business API
   async sendInteractiveButtonMessage(phoneNumber, message, buttons) {
-    const url = `https://graph.facebook.com/${this.apiVersion}/${this.businessPhone}/messages`;
     const data = {
       messaging_product: 'whatsapp',
       to: phoneNumber,
@@ -71,21 +39,10 @@ class WhatsAppService {
         }
       }
     };
-    const headers = {
-      Authorization: `Bearer ${this.apiToken}`,
-      'Content-Type': 'application/json'
-    };
-    try {
-      const response = await axios.post(url, data, { headers });
-      return response.data;
-    } catch (error) {
-      console.error('Error response from WhatsApp API:', error.response?.data);
-      throw new Error(`Error sending WhatsApp interactive button message: ${error.message}`);
-    }
+    await sendToWhatsApp(data);
   }
   //function to send media message
   async sendMediaMessage(phoneNumber, mediaUrl, mediaType, caption) {
-    const url = `https://graph.facebook.com/${this.apiVersion}/${this.businessPhone}/messages`;
     const mediaObject = {}
     switch (mediaType) {
       case 'image':
@@ -109,41 +66,20 @@ class WhatsAppService {
       type: mediaType,
       ...mediaObject
     };
-    const headers = {
-      Authorization: `Bearer ${this.apiToken}`,
-      'Content-Type': 'application/json'
-    };
-    try {
-      const response = await axios.post(url, data, { headers });
-      return response.data;
-    } catch (error) {
-      throw new Error(`Error sending WhatsApp media message: ${error.message}`);
-    }
+    await sendToWhatsApp(data);
   }
   //function to send contact message
   async sendContactMessage(phoneNumber, contacts) {
-    const url = `https://graph.facebook.com/${this.apiVersion}/${this.businessPhone}/messages`;
     const data = {
       messaging_product: 'whatsapp',
       to: phoneNumber,
       type: 'contacts',
       contacts: [contacts]
     };
-    const headers = {
-      Authorization: `Bearer ${this.apiToken}`,
-      'Content-Type': 'application/json'
-    };
-    try {
-      const response = await axios.post(url, data, { headers });
-      return response.data;
-    } catch (error) {
-      console.error('Error response from WhatsApp API:', error.response?.data);
-      throw new Error(`Error sending WhatsApp contact message: ${error.message}`);
-    }
+    await sendToWhatsApp(data);
   }
   //function to send location message
   async sendLocationMessage(phoneNumber, latitude, longitude, name, address) {
-    const url = `https://graph.facebook.com/${this.apiVersion}/${this.businessPhone}/messages`;
     const data = {
       messaging_product: 'whatsapp',
       to: phoneNumber,
@@ -155,16 +91,7 @@ class WhatsAppService {
         address: address
       }
     };
-    const headers = {
-      Authorization: `Bearer ${this.apiToken}`,
-      'Content-Type': 'application/json'
-    };
-    try {
-      const response = await axios.post(url, data, { headers });
-      return response.data;
-    } catch (error) {
-      throw new Error(`Error sending WhatsApp location message: ${error.message}`);
-    }
+    await sendToWhatsApp(data);
   }  
 } 
 
