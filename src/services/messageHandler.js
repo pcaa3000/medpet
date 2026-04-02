@@ -102,6 +102,7 @@ class MessageHandler {
         responseMessage = 'Vamos a agendar una cita. Por favor, proporciona tu nombre para comenzar.';
         break;
       case 'opcion_2':
+      case 'another_question':
         this.asistantState[phoneNumber] = { step: 'question' }; // Initialize the assistant flow state
         responseMessage = 'Realiza su consulta';
         break;
@@ -113,8 +114,10 @@ class MessageHandler {
         responseMessage = 'En caso de emergencia, te invitamos a llamar a nuestro centro de contacto.';
         await this.sendEmergencyContact(phoneNumber);
         break;
+      case 'end_conversation':
+        responseMessage = 'Gracias por contactarnos. Si necesitas algo más, no dudes en escribirnos. ¡Que tengas un buen día!';
+        break;
       default:
-        //await whatsappService.sendMessage(phoneNumber, 'Opción no válida');
         responseMessage = 'Opción no válida';
     }
     await whatsappService.sendMessage(phoneNumber, responseMessage);
@@ -203,7 +206,7 @@ class MessageHandler {
         responseMessage = '¡Hola! Para agendar una cita, por favor proporciona tu nombre.';
         state.step = 'name';
     }
-    this.appointmentState[phoneNumber] = state; // Save the state for the user
+    //this.appointmentState[phoneNumber] = state; // Save the state for the user
     await whatsappService.sendMessage(phoneNumber, responseMessage);
   }
   //function to handle assistant flow
